@@ -1,3 +1,12 @@
+# Farzan's Notes
+
+The main branch just uses a simple in-memory dict to store orders. The v-sqllite branch uses a sqlite db. Functionally they are both the same except the latter persists the data between runs.
+
+For the sqllite branch, make sure to run `pip install sqlalchemy` before running the app.
+
+Both branches also support editing previous orders, however **only** relative changes. E.g. something like "Add 2 more drinks and 1 more burger on order 2" is supported but, "Change order 2 to be 4 drinks and 6 burgers" is not.
+
+
 # Instructions
 
 Create a mock drive thru ordering system that allows users to place and cancel their orders using AI.
