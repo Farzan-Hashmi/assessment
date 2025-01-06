@@ -44,13 +44,13 @@ def place_order(order: Order):
             drinks=order_info["drinks_delta"],
         )
     elif order_info["is_deleting_order"]:
-        order_number = int(order_info["order_number"])
+        order_number = order_info["order_number"]
         if order_number not in order_history:
             raise HTTPException(status_code=404, detail="Order not found")
 
         del order_history[order_number]
     else:
-        order_number = int(order_info["order_number"])
+        order_number = order_info["order_number"]
         if order_number not in order_history:
             raise HTTPException(status_code=404, detail="Order not found")
 

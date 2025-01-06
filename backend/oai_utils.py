@@ -29,7 +29,7 @@ _FUNCTION_DESCRIPTION = [
                         "description": "Whether or not the order is being edited. e.g. 'true' if the order is being edited, 'false' if the order is not being edited. Note that only one of 'is_creating_order', 'is_deleting_order', and 'is_editing_order' can be 'true'.",
                     },
                     "order_number": {
-                        "type": "string",
+                        "type": "integer",
                         "description": "The order number of the order being modified if the order is not a new order. If the order is a new order, this field is not required.",
                     },
                     "burger_delta": {
