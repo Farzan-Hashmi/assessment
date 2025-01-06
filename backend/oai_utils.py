@@ -5,7 +5,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
+# NB: Structured Outputs might be a better fit for this task than function calling?
 
 _FUNCTION_DESCRIPTION = [
     {

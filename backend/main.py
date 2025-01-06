@@ -1,22 +1,21 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from pydantic import BaseModel
 from oai_utils import extract_order_info
+from db_utils import get_db, init_db, Order
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 
 
-class Order(BaseModel):
+init_db()
+
+
+class OrderRequest(BaseModel):
     text: str
 
 
-class OrderInfo(BaseModel):
-    order_number: int
-    burgers: int
-    fries: int
-    drinks: int
-
-
 app = FastAPI()
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,32 +26,34 @@ app.add_middleware(
 )
 
 
-order_history = {}
-
-
 @app.post("/place_order")
-def place_order(order: Order):
+def place_order(order: OrderRequest, db: Session = Depends(get_db)):
     order_info = extract_order_info(order.text)
     if order_info["is_creating_order"]:
-        order_number = len(order_history) + 1
-        order_history[order_number] = OrderInfo(
+        order_number = db.query(Order).count() + 1
+        new_order = Order(
             order_number=order_number,
             burgers=order_info["burger_delta"],
             fries=order_info["fries_delta"],
             drinks=order_info["drinks_delta"],
         )
+        db.add(new_order)
+        db.commit()
+        db.refresh(new_order)
+
     elif order_info["is_deleting_order"]:
         order_number = int(order_info["order_number"])
-        if order_number not in order_history:
+        order_to_delete = _get_order_by_number(order_number, db)
+        if not order_to_delete:
             raise HTTPException(status_code=404, detail="Order not found")
+        db.delete(order_to_delete)
+        db.commit()
 
-        del order_history[order_number]
     else:
         order_number = int(order_info["order_number"])
-        if order_number not in order_history:
+        current_order = _get_order_by_number(order_number, db)
+        if not current_order:
             raise HTTPException(status_code=404, detail="Order not found")
-
-        current_order = order_history[order_number]
 
         burger_delta = order_info["burger_delta"]
         fries_delta = order_info["fries_delta"]
@@ -71,19 +72,27 @@ def place_order(order: Order):
         current_order.fries = new_fries
         current_order.drinks = new_drinks
 
+        db.commit()
+        db.refresh(current_order)
+
 
 @app.get("/order_history")
-def get_order_history():
-    return list(order_history.values())[::-1]
+def get_order_history(db: Session = Depends(get_db)):
+    return db.query(Order).all()
 
 
+# NB: this isn't as efficient for large datasets
 @app.get("/total_orders")
-def get_total_orders():
+def get_total_orders(db: Session = Depends(get_db)):
     return {
-        "total_burger_orders": sum(order.burgers for order in order_history.values()),
-        "total_drink_orders": sum(order.drinks for order in order_history.values()),
-        "total_fry_orders": sum(order.fries for order in order_history.values()),
+        "total_burger_orders": sum(order.burgers for order in db.query(Order).all()),
+        "total_drink_orders": sum(order.drinks for order in db.query(Order).all()),
+        "total_fry_orders": sum(order.fries for order in db.query(Order).all()),
     }
+
+
+def _get_order_by_number(order_number: int, db: Session = Depends(get_db)):
+    return db.query(Order).filter(Order.order_number == order_number).first()
 
 
 if __name__ == "__main__":
