@@ -1,2 +1,4 @@
 
 backend/orders.db
+
+*.pyc

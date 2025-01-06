@@ -33,6 +33,8 @@ order_history = {}
 @app.post("/place_order")
 def place_order(order: Order):
     order_info = extract_order_info(order.text)
+    if order_info is None:
+        raise HTTPException(status_code=400, detail="Invalid order")
     if order_info["is_creating_order"]:
         order_number = len(order_history) + 1
         order_history[order_number] = OrderInfo(

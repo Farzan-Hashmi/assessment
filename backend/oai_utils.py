@@ -77,5 +77,7 @@ def extract_order_info(order_text):
         messages=messages,
         tools=_FUNCTION_DESCRIPTION,
     )
+    if response.choices[0].message.tool_calls is None:
+        return None
 
     return json.loads(response.choices[0].message.tool_calls[0].function.arguments)

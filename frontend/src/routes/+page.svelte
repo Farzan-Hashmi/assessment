@@ -23,7 +23,7 @@
             body: JSON.stringify({ text: orderText }),
         });
         if (!response.ok) {
-            alert("Order does not exist");
+            alert("Order does not exist or invalid order");
         }
         orderText = "";
         fetchOrderHistory();
