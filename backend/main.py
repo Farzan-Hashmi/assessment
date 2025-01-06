@@ -44,7 +44,7 @@ def place_order(order: OrderRequest, db: Session = Depends(get_db)):
         db.refresh(new_order)
 
     elif order_info["is_deleting_order"]:
-        order_number = int(order_info["order_number"])
+        order_number = order_info["order_number"]
         order_to_delete = _get_order_by_number(order_number, db)
         if not order_to_delete:
             raise HTTPException(status_code=404, detail="Order not found")
@@ -52,7 +52,7 @@ def place_order(order: OrderRequest, db: Session = Depends(get_db)):
         db.commit()
 
     else:
-        order_number = int(order_info["order_number"])
+        order_number = order_info["order_number"]
         current_order = _get_order_by_number(order_number, db)
         if not current_order:
             raise HTTPException(status_code=404, detail="Order not found")
