@@ -73,7 +73,7 @@ def extract_order_info(order_text):
     ]
 
     response = openai.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o",
         messages=messages,
         tools=_FUNCTION_DESCRIPTION,
     )
