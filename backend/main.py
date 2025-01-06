@@ -29,6 +29,8 @@ app.add_middleware(
 @app.post("/place_order")
 def place_order(order: OrderRequest, db: Session = Depends(get_db)):
     order_info = extract_order_info(order.text)
+    if order_info is None:
+        raise HTTPException(status_code=400, detail="Invalid order")
     if order_info["is_creating_order"]:
         order_number = db.query(Order).count() + 1
         new_order = Order(
